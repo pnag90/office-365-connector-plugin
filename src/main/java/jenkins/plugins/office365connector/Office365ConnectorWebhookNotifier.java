@@ -38,7 +38,9 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Office365ConnectorWebhookNotifier {
 
-    private static final Logger LOGGER = Logger.getLogger(Office365ConnectorWebhookNotifier.class.getName());
+    // package-private so other plugin classes (e.g. HttpWorker) log through the same logger,
+    // letting a single Log Recorder on this class name capture all plugin log output
+    static final Logger LOGGER = Logger.getLogger(Office365ConnectorWebhookNotifier.class.getName());
 
     private static final Gson gson = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)

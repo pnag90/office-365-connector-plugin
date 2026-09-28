@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import jenkins.model.Jenkins;
@@ -52,8 +51,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
  * curl -X POST -H "Content-Type: application/json" -d "@completed-success.json" "https://webhook.office.com/webhookb2..." -vs
  */
 public class HttpWorker implements Runnable {
-
-    private static final Logger LOGGER = Logger.getLogger(HttpWorker.class.getName());
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -106,7 +103,7 @@ public class HttpWorker implements Runnable {
             } catch (IOException | ParseException e) {
                 // The exception may reference the full URL, so keep the detail out of the job console
                 log("Failed to post data to %s.", redactUrl(url));
-                LOGGER.log(Level.WARNING, "Failed to post data to " + redactUrl(url), e);
+                Office365ConnectorWebhookNotifier.LOGGER.log(Level.WARNING, "Failed to post data to " + redactUrl(url), e);
             }
         } while (tried < RETRIES && !success);
 
