@@ -121,13 +121,20 @@ public class Office365ConnectorWebhookNotifier {
             // the URL value, so scoping the call here keeps the secret URL out of the failure paths below
             url = run.getEnvironment(taskListener).expand(webhook.resolveUrl(run));
         } catch (IllegalStateException e) {
-            String credentialHint = webhook.getUrlCredentialId() != null
-                    ? String.format(" (credential id '%s')", webhook.getUrlCredentialId())
-                    : "";
-            log(String.format("Webhook '%s'%s cannot send notification: %s",
-                    webhook.getName() != null ? webhook.getName() : "(unnamed)",
-                    credentialHint,
-                    e.getMessage()));
+            String webhookName = webhook.getName() != null ? webhook.getName() : "(unnamed)";
+            String urlCredentialId = webhook.getUrlCredentialId();
+            String message;
+            if (StringUtils.isBlank(urlCredentialId) && StringUtils.isBlank(webhook.getUrl())) {
+                // Neither a URL nor a credential is configured at all: a valid, deliberate way to
+                // silence a webhook (e.g. on non-production jobs), so keep the wording neutral
+                message = String.format("Webhook '%s' has no URL or credential configured; skipping notification.", webhookName);
+            } else if (urlCredentialId != null) {
+                message = String.format("Webhook '%s' (credential id '%s') cannot send notification: %s",
+                        webhookName, urlCredentialId, e.getMessage());
+            } else {
+                message = String.format("Webhook '%s' cannot send notification: %s", webhookName, e.getMessage());
+            }
+            log(message);
             return;
         } catch (IOException | InterruptedException e) {
             // The failure may reference the resolved URL, so keep the detail out of the job console
